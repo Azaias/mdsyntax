@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "mdsyntax"
-version = "0.1.0"
+version = "0.1.1"
 description = "Render markdown with syntax highlighting in the terminal"
 readme = "README.md"
 license = "MIT"
