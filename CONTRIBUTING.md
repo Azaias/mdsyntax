@@ -6,7 +6,7 @@ Thanks for your interest in contributing!
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/Azaias/mdsyntax.git
+   git clone https://github.com/yourusername/mdsyntax.git
    cd mdsyntax
    ```
 

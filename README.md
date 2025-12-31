@@ -52,6 +52,35 @@ mdsyntax --style dracula document.md
 mdsyntax --list-styles
 ```
 
+## Styling API
+
+Style arbitrary text without markdown:
+
+```python
+from mdsyntax import Style, style
+
+# Static methods
+print(Style.bold_text("important"))
+print(Style.italic_text("emphasis"))
+print(Style.color("warning", fg="red"))
+print(Style.color("highlight", fg="white", bg="blue"))
+
+# Chainable API
+print(style("hello").bold().italic())
+print(style("fancy").fg("cyan").underline())
+print(style("rgb").fg((255, 100, 50)))  # RGB colors
+```
+
+Available styles:
+- `bold()` / `Style.bold_text()`
+- `dim()` / `Style.dim_text()`
+- `italic()` / `Style.italic_text()`
+- `underline()` / `Style.underline_text()`
+- `strikethrough()` / `Style.strike_text()`
+- `fg(color)` / `bg(color)` - named colors or RGB tuples
+
+Named colors: `black`, `red`, `green`, `yellow`, `blue`, `magenta`, `cyan`, `white`
+
 ## Features
 
 - Headers (h1-h6) with color coding
@@ -80,7 +109,7 @@ Any [Pygments style](https://pygments.org/styles/) is supported. Popular options
 
 ### True Color
 
-By default, md-print auto-detects 24-bit color support via the `COLORTERM` environment variable. You can override this:
+By default, mdsyntax auto-detects 24-bit color support via the `COLORTERM` environment variable. You can override this:
 
 ```python
 # Force 256-color mode
@@ -132,10 +161,36 @@ print(hl.highlight("print('hello')", "python"))
 print(SyntaxHighlighter.available_styles())
 ```
 
+### `Style` / `style()`
+
+Style text without markdown parsing:
+
+```python
+from mdsyntax import Style, style
+
+# Static (returns string directly)
+Style.bold_text("text")
+Style.color("text", fg="red", bg="white")
+
+# Chainable (call str() or print directly)
+style("text").bold().fg("blue")
+```
+
+### `Ansi`
+
+Direct access to ANSI escape codes:
+
+```python
+from mdsyntax import Ansi
+
+print(f"{Ansi.BOLD}Bold{Ansi.BOLD_OFF}")
+print(f"{Ansi.FG_RED}Red{Ansi.FG_DEFAULT}")
+print(f"{Ansi.rgb_fg(255, 100, 50)}RGB{Ansi.FG_DEFAULT}")
+```
+
 ## License
 
 MIT
-
 
 ## Contributing
 

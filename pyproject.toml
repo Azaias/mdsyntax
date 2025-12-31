@@ -4,13 +4,13 @@ build-backend = "hatchling.build"
 
 [project]
 name = "mdsyntax"
-version = "0.1.1"
+version = "0.2.0"
 description = "Render markdown with syntax highlighting in the terminal"
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.10"
 authors = [
-    { name = "Izaiah Meyer", email = "lolduderlly@gmail.com" }
+    { name = "Your Name", email = "you@example.com" }
 ]
 keywords = [
     "markdown",
@@ -49,9 +49,9 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/Azaias/mdsyntax"
-Repository = "https://github.com/Azaias/mdsyntax"
-Issues = "https://github.com/Azaias/mdsyntax/issues"
+Homepage = "https://github.com/yourusername/mdsyntax"
+Repository = "https://github.com/yourusername/mdsyntax"
+Issues = "https://github.com/yourusername/mdsyntax/issues"
 
 [project.scripts]
 mdsyntax = "mdsyntax.cli:main"

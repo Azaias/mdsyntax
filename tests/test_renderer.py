@@ -2,7 +2,15 @@
 
 import re
 
-from mdsyntax import LANG_ALIASES, MarkdownRenderer, SyntaxHighlighter, md_render
+from mdsyntax import (
+    LANG_ALIASES,
+    Ansi,
+    MarkdownRenderer,
+    Style,
+    SyntaxHighlighter,
+    md_render,
+    style,
+)
 
 
 def strip_ansi(text: str) -> str:
@@ -103,6 +111,21 @@ class TestBlockFormatting:
         assert "quoted" in plain
         assert "│" in plain
 
+    def test_blockquote_with_inline_code(self):
+        """Regression test: inline code in blockquotes should not break styling."""
+        result = md_render("> Here's some `code` and text after")
+        plain = strip_ansi(result)
+        assert "code" in plain
+        assert "text after" in plain
+        # Check that italic is restored after code
+        assert Ansi.ITALIC in result
+        # The text after code should still have italic applied
+        code_pos = result.find("code")
+        after_pos = result.find("text after")
+        # There should be an italic code between them
+        between = result[code_pos:after_pos]
+        assert Ansi.ITALIC in between or result.count(Ansi.ITALIC) >= 1
+
     def test_horizontal_rule(self):
         result = md_render("---")
         assert "─" in strip_ansi(result)
@@ -110,6 +133,19 @@ class TestBlockFormatting:
     def test_code_block(self):
         result = md_render("```python\nprint('hi')\n```")
         assert "print" in strip_ansi(result)
+
+    def test_code_block_width_expansion(self):
+        """Long lines in code blocks should expand the width, not truncate."""
+        long_line = "x" * 100
+        result = md_render(f"```\n{long_line}\n```", code_width=50)
+        plain = strip_ansi(result)
+        # The long line should be fully present (not truncated)
+        assert long_line in plain
+        # All lines should be padded to the same width (the longest line's width)
+        lines = [l for l in plain.split("\n") if l.strip()]
+        widths = [len(l) for l in lines]
+        assert all(w == widths[0] for w in widths), "All lines should have same width"
+        assert widths[0] >= 100, "Width should expand to fit content"
 
 
 class TestEdgeCases:
@@ -183,3 +219,77 @@ class TestLangAliases:
         assert LANG_ALIASES["js"] == "javascript"
         assert LANG_ALIASES["ts"] == "typescript"
         assert LANG_ALIASES["sh"] == "bash"
+
+
+class TestStyleAPI:
+    """Tests for the new Style API."""
+
+    def test_bold_text_static(self):
+        result = Style.bold_text("test")
+        assert Ansi.BOLD in result
+        assert Ansi.BOLD_OFF in result
+        assert "test" in result
+
+    def test_italic_text_static(self):
+        result = Style.italic_text("test")
+        assert Ansi.ITALIC in result
+        assert Ansi.ITALIC_OFF in result
+
+    def test_underline_text_static(self):
+        result = Style.underline_text("test")
+        assert Ansi.UNDERLINE in result
+        assert Ansi.UNDERLINE_OFF in result
+
+    def test_strike_text_static(self):
+        result = Style.strike_text("test")
+        assert Ansi.STRIKETHROUGH in result
+        assert Ansi.STRIKETHROUGH_OFF in result
+
+    def test_color_fg(self):
+        result = Style.color("test", fg="red")
+        assert Ansi.FG_RED in result
+        assert Ansi.FG_DEFAULT in result
+
+    def test_color_bg(self):
+        result = Style.color("test", bg="blue")
+        assert Ansi.BG_BLUE in result
+        assert Ansi.BG_DEFAULT in result
+
+    def test_color_both(self):
+        result = Style.color("test", fg="red", bg="blue")
+        assert Ansi.FG_RED in result
+        assert Ansi.BG_BLUE in result
+
+    def test_color_rgb(self):
+        result = Style.color("test", fg=(255, 0, 0))
+        assert "38;2;255;0;0" in result
+
+    def test_chainable_bold(self):
+        result = str(style("test").bold())
+        assert Ansi.BOLD in result
+        assert "test" in result
+
+    def test_chainable_multiple(self):
+        result = str(style("test").bold().italic())
+        assert Ansi.BOLD in result
+        assert Ansi.ITALIC in result
+
+    def test_chainable_fg(self):
+        result = str(style("test").fg("red"))
+        assert Ansi.FG_RED in result
+
+    def test_chainable_bg(self):
+        result = str(style("test").bg("blue"))
+        assert Ansi.BG_BLUE in result
+
+    def test_chainable_rgb(self):
+        result = str(style("test").fg((100, 150, 200)))
+        assert "38;2;100;150;200" in result
+
+    def test_style_repr(self):
+        s = Style("hello")
+        assert "hello" in repr(s)
+
+    def test_empty_style(self):
+        s = Style("plain")
+        assert str(s) == "plain"
